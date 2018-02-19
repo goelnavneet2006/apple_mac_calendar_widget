@@ -1,0 +1,210 @@
+<div class="left">
+	<div id="leftFullDay"></div>
+	<div id="leftDate"></div>
+</div>
+
+<div class="right">
+	<div class="firstRow">
+		<span id="prevMonth"><</span><span class="rightMonthYear">
+			<span id="rightMonth"></span>
+			<span id="rightYear"></span>
+		</span><span id="nextMonth">></span>
+		</div>
+	<ul class="weeks">
+		<li class="week">S</li><li class="week">M</li><li class="week">T</li><li class="week">W</li><li class="week">T</li><li class="week">F</li><li class="week">S</li>
+	</ul>
+	<div id="dates"></div>
+</div>
+
+<style>
+
+	body {
+		user-select: none;
+    display: flex;
+    height: 305px;
+	}
+
+	#prevMonth, #nextMonth {
+		width: 10%;
+		display: inline-block;
+		cursor: pointer;
+	}
+
+	.left {
+		width: 200px;
+		text-align: center;
+	}
+
+	#leftFullDay {
+		font-size: 40px;
+	}
+
+	#leftDate {
+		font-size: 180px;
+	}
+
+
+	.left, .right {
+		padding: 5px;
+    display: inline-block;
+    border: 2px solid;
+    border-radius: 5px;
+		margin: 5px;
+	}
+
+	#nextMonth{
+		text-align: right;
+	}
+
+	.rightMonthYear {
+		width: 80%;
+		display: inline-block;
+		text-align: center;
+	}
+
+	.firstRow {
+		border-radius: 5px;
+    background: #eca022;
+    width: 275px;
+    display: table-cell;
+    height: 28px;
+    vertical-align: middle;
+    font-weight: bold;
+	}
+
+
+	.week, .date {
+		display: inline-block;
+    background: #5eabd4;
+    padding: 5px;
+    width: 25px;
+    border-radius: 5px;
+    margin-right: 5px;
+	}
+
+	.date{
+		margin-bottom: 5px;
+		cursor: pointer;
+	}
+
+	.week {
+		font-weight: bold;
+		background: #06ca86;
+	}
+
+	ul, #dates {
+		padding: 0;
+    width: 280px;
+	}
+
+	.today {
+		background: #adad0c;
+	}
+
+
+
+</style>
+
+<script>
+
+	var daysObj = {
+		0: "S",
+		1: "M",
+		2: "T",
+		3: "W",
+		4: "T",
+		5: "F",
+		6: "S"
+	};
+
+	var fullDaysObj = {
+		0: "Sunday",
+		1: "Monday",
+		2: "Tuesday",
+		3: "Wednesday",
+		4: "Thrusday",
+		5: "Friday",
+		6: "Saturday"
+	};
+
+	var monthsObj = {
+		0: "January",
+		1: "February",
+		2: "March",
+		3: "April",
+		4: "May",
+		5: "June",
+		6: "July",
+		7: "August",
+		8: "September",
+		9: "October",
+		10: "November",
+		11: "December"
+	};
+
+	MonthlyCalendar.prototype.updateDate = function (event) {
+		var targetEle = event.target;
+		var clickedDate = targetEle.textContent;
+		if (targetEle.classList.contains("date") && clickedDate !== this.originalDate.getDate()){
+			this.currentDate.setDate(clickedDate);
+			this.load(this.currentDate);
+		}
+	}
+
+	MonthlyCalendar.prototype.daysInMonth = function (date) {
+		return 32 - new Date(date.getFullYear(), date.getMonth(), 32).getDate();
+	}
+
+	function MonthlyCalendar(date) {
+		this.originalDate = date || new Date();
+		this.currentDate = new Date(this.originalDate.toDateString());
+	}
+
+	MonthlyCalendar.prototype.load = function (dateInput) {
+		var date = dateInput || this.originalDate;
+		var results = "";
+		var tempDate = new Date(date.getFullYear(), date.getMonth(), 1);
+		var tempDateDay = tempDate.getDay();
+
+		for (var i = 1, j = 1; i <= 42; i++) {
+			if (i < tempDateDay + 1 || i > (tempDateDay + this.daysInMonth(date))) {
+				results = results.concat("<span class='date'></span>");
+			} else {
+				if (j == date.getDate() && (date.getMonth() == this.originalDate.getMonth() && date.getFullYear() == this.originalDate.getFullYear())) {
+					results = results.concat("<span class='today date'>"+ j +"</span>");
+				} else {
+					results = results.concat("<span class='date'>"+ j +"</span>");
+				}
+				j++;
+			}
+		}
+
+		document.getElementById("dates").innerHTML = results;
+		document.getElementById("rightMonth").innerHTML = monthsObj[date.getMonth()];
+		document.getElementById("rightYear").innerHTML = date.getFullYear();
+
+		document.getElementById("leftFullDay").innerHTML = fullDaysObj[date.getDay()];
+		document.getElementById("leftDate").innerHTML = date.getDate();
+	};
+
+	MonthlyCalendar.prototype.updateMonthOrYear = function (showPrevMonth) {
+		if (showPrevMonth) {
+			this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+		} else {
+			this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+		}
+		if (this.currentDate.getMonth() == this.originalDate.getMonth() && this.currentDate.getFullYear() == this.originalDate.getFullYear()) {
+			this.currentDate.setDate(this.originalDate.getDate());
+		}
+		this.load(this.currentDate);
+	}
+
+  window.addEventListener("load", function () {
+		var monthlyCalendar = new MonthlyCalendar();
+		monthlyCalendar.load();
+		document.getElementById("dates").addEventListener("click", monthlyCalendar.updateDate.bind(monthlyCalendar));
+		document.getElementById("prevMonth").addEventListener("click", monthlyCalendar.updateMonthOrYear.bind(monthlyCalendar, true));
+		document.getElementById("nextMonth").addEventListener("click", monthlyCalendar.updateMonthOrYear.bind(monthlyCalendar, false));
+	});
+
+</script>
